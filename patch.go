@@ -9,16 +9,16 @@ import (
 )
 
 // Struct patches (modifies) its resource input with each message in
-// patchMessages. The resource provided must be a pointer to a struct, or an
+// patches. The resource provided must be a pointer to a struct, or an
 // error will be returned.
 //
 // Reflection is used to traverse the struct's fields and match them with the
-// keys in patchMessages. On finding a matching field, the raw patch message is
+// keys in patches. On finding a matching field, the raw patch message is
 // unmarshalled into the matching struct field.
 //
 // If a patch message is null, then its corresponding struct field will be set
 // to its zero value.
-func Struct(resource interface{}, patchMessages map[string]*json.RawMessage) (err error) {
+func Struct(resource interface{}, patches map[string]*json.RawMessage) error {
 	value := reflect.ValueOf(resource)
 	for value.Kind() == reflect.Interface || value.Kind() == reflect.Ptr {
 		value = value.Elem()
@@ -35,7 +35,7 @@ func Struct(resource interface{}, patchMessages map[string]*json.RawMessage) (er
 		if !field.CanAddr() || !field.CanInterface() {
 			continue
 		}
-		if patch, ok := patchMessages[jsonFieldName(valueT.Field(i))]; ok {
+		if patch, ok := patches[jsonFieldName(valueT.Field(i))]; ok {
 			if patch == nil {
 				// set to zero value
 				field.Set(reflect.Zero(field.Type()))
